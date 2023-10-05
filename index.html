@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《庫洛魔法使》翻牌遊戲</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-direction: column;
+      background: url("http://img.9553.com/uploadfile/2017/0704/20170704020508329.jpg") no-repeat center 0px/cover;
+    }
+
+    .card {
+      width: 100px;
+      height: 180px;
+      position: relative;
+      float: left;
+      margin: 10px;
+      /* 設定子元素在 3D 空間內 */
+      transform-style: preserve-3d;
+      transition: transform 1s;
+    }
+
+    .card-front {
+      width: 100%;
+      height: 100%;
+      background-image: url("./cards/1H.jpg");
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: absolute;
+      /* 隱藏背面 */
+      backface-visibility: hidden;
+    }
+
+    .card-back {
+      width: 100%;
+      height: 100%;
+      background-image: url("./images/card-1.png");
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: absolute;
+      backface-visibility: hidden;
+      transform: rotateY(180deg);
+    }
+
+    .card-close {
+      transform: rotateY(180deg);
+    }
+
+    #game {
+      width: 960px;
+      /* margin: auto; */
+    }
+
+    input {
+      width: 100px;
+      height: 60px;
+      font-size: 18px;
+      border-radius: 0 2rem 0 2rem;
+      background: pink;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin: 0 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <div class="card">
+    <div class="card-front"></div>
+    <div class="card-back"></div>
+  </div> -->
+  <div id="game"></div>
+  <div>
+    <input class="btn" type="button" value="庫洛牌">
+    <input class="btn" type="button" value="小櫻牌">
+  </div>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js'
+    integrity='sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ=='
+    crossorigin='anonymous'></script>
+
+  <script>
+
+    for (let i = 0; i < 16; i++) {
+      $('#game').append(`
+      <div class="card card-close">
+        <div class="card-front"></div>
+        <div class="card-back"></div>
+      </div>
+      `)
+    }
+
+    for (let i = 0; i < 16; i++) {
+      const num = i % 8 + 1
+      $('.card').eq(i).find('.card-front').css('background-image', `url(./images/kuro1-${num}.gif)`)
+      $('.card').eq(i).attr('data-card', num)
+
+      const target = Math.round(Math.random() * 15)
+      $('.card').eq(target).insertAfter($('.card').eq(i))
+    }
+
+    $('#game').on('click', '.card', function () {
+      if (
+        // 如果還沒翻開兩張
+        $('.card:not(.card-close)').length < 2 &&
+        // 且這張牌還沒翻開
+        $(this).hasClass('card-close') &&
+        // 且這張牌還沒配對
+        !$(this).hasClass('card-ok')
+      ) {
+        // 符合才翻開
+        $(this).removeClass('card-close')
+      }
+
+      console.log($('.card:not(.card-close)').length)
+
+      // 如果翻開兩張了
+      if ($('.card:not(.card-close)').length === 2) {
+
+        if ($('.card:not(.card-close)').eq(0).attr('data-card') ===
+          $('.card:not(.card-close)').eq(1).attr('data-card')
+        ) {
+          $('.card:not(.card-close)').addClass('card-ok')
+          $('.card:not(.card-close)').fadeTo(1000, 0)
+        }
+
+        // 不管數字是都翻回來
+        setTimeout(function () {
+          $('.card:not(.card-close)').addClass('card-close')
+          if ($('.card-ok').length === $('.card').length) {
+            alert('恭喜')
+          }
+        }, 1000)
+      }
+    })
+
+    $('.btn').each(function (index, btn) {
+      $(this).on('click', function () {
+        $('.card').find('.card-back').css('background-image', `url(./images/card-${index + 1}.png)`)
+        for (let i = 0; i < 16; i++) {
+          $('.card').eq(i).find('.card-front').css('background-image', `url(./images/kuro${index + 1}-${$('.card').eq(i).attr('data-card')}.gif)`)
+        }
+        $(this).css('background', 'rgb(110, 80, 80)')
+        $(this).css('transform', 'scale(1.2)')
+        $(this).siblings().css('background', 'pink')
+        $(this).siblings().css('transform', 'scale(1)')
+      })
+    })
+
+    $('.btn').eq(0).click()
+  </script>
+
+</body>
+
+</html>
